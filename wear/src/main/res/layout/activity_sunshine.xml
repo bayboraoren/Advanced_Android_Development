@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.wearable.view.BoxInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_blue"
+    tools:context="tr.wear.SunshineActivity"
+    tools:deviceIds="wear">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:padding="5dp"
+        android:layout_marginBottom="40dp"
+        app:layout_box="all">
+
+
+        <TextView
+            android:id="@+id/clock"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:hint="CLOCK"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:textSize="40dp" />
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:paddingBottom="30dp"
+            android:text="FRI, JUL 14 2015"
+            android:textColor="@color/date_color"
+            android:textSize="20dp" />
+
+    </FrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_gravity="center"
+        android:background="@color/horizontal_rule_color" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginRight="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginBottom="40dp">
+
+        <ImageButton
+            android:id="@+id/days_weather_image"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom|left"
+            android:background="@null"
+            android:src="@drawable/art_clear" />
+
+        <TextView
+            android:id="@+id/higher_degree"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom|center"
+            android:background="@null"
+            android:textSize="30dp"
+            android:textStyle="bold"
+            android:textColor="@color/higher_degree_color"
+            android:gravity="center|center"
+            android:text="25&#xb0;" />
+
+
+        <TextView
+            android:id="@+id/lower_degree"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:gravity="center|center"
+            android:textSize="30dp"
+            android:textColor="@color/lower_degree_color"
+            android:layout_gravity="bottom|right"
+            android:background="@null"
+            android:text="16&#xb0;" />
+
+    </FrameLayout>
+
+</android.support.wearable.view.BoxInsetLayout>
