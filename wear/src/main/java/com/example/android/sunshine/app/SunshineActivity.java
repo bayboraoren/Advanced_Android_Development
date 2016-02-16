@@ -4,8 +4,12 @@ import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.BoxInsetLayout;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -39,6 +43,7 @@ public class SunshineActivity extends WearableActivity  implements
     private TextView mHighTemp;
     private TextView mLowTemp;
     private TextView mCityName;
+    private View mHorizontalRuler;
 
     private BoxInsetLayout mContainerView;
     //private TextView mTextView;
@@ -59,6 +64,7 @@ public class SunshineActivity extends WearableActivity  implements
         mHighTemp = (TextView ) findViewById(R.id.higher_degree);
         mLowTemp = (TextView ) findViewById(R.id.lower_degree);
         mCityName = (TextView ) findViewById(R.id.city_name);
+        mHorizontalRuler = (View) findViewById(R.id.horizontal_ruler);
 
         initGoogleApiClient();
 
@@ -114,15 +120,33 @@ public class SunshineActivity extends WearableActivity  implements
         Date date = new Date();
 
         if (isAmbient()) {
-            //mContainerView.setBackgroundColor(getResources().getColor(android.R.color.black));
-            //mTextView.setTextColor(getResources().getColor(android.R.color.white));
-            mClockView.setVisibility(View.VISIBLE);
+            mContainerView.setBackgroundColor(getResources().getColor(R.color.background_blue));
+            mDate.setVisibility(View.VISIBLE);
             mDate.setText(AMBIENT_DATE_FORMAT.format(date));
             mClockView.setText(AMBIENT_HOUR_FORMAT.format(date));
+            mHighTemp.setVisibility(View.VISIBLE);
+            mLowTemp.setVisibility(View.VISIBLE);
+            mHorizontalRuler.setVisibility(View.VISIBLE);
+            mCityName.setTextColor(getResources().getColor(R.color.city_color));
+
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.gravity = Gravity.BOTTOM|Gravity.LEFT;
+            mDaysWeatherImage.setLayoutParams(params);
+
         } else {
-            //mContainerView.setBackground(null);
-            //mTextView.setTextColor(getResources().getColor(android.R.color.black));
-            mClockView.setVisibility(View.GONE);
+
+            mContainerView.setBackgroundColor(getResources().getColor(R.color.black));
+            mDate.setVisibility(View.GONE);
+            mClockView.setText(AMBIENT_HOUR_FORMAT.format(date));
+            mHighTemp.setVisibility(View.GONE);
+            mLowTemp.setVisibility(View.GONE);
+            mHorizontalRuler.setVisibility(View.GONE);
+            mCityName.setTextColor(getResources().getColor(R.color.white));
+
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.gravity = Gravity.BOTTOM|Gravity.CENTER;
+            mDaysWeatherImage.setLayoutParams(params);
+
         }
     }
 

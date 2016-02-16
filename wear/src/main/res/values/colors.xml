@@ -2,6 +2,7 @@
 <resources>
 
     <color name="background_blue">#2aa9f1</color>
+    <color name="city_color">#b3e1f9</color>
     <color name="date_color">#b3e1f9</color>
     <color name="horizontal_rule_color">#58bdf4</color>
     <color name="higher_degree_color">#fff</color>
