@@ -45,8 +45,7 @@ public class SunshineActivity extends WearableActivity  implements
     private TextView mCityName;
     private View mHorizontalRuler;
 
-    private BoxInsetLayout mContainerView;
-    //private TextView mTextView;
+    private LinearLayout mContainerView;
 
 
 
@@ -56,15 +55,14 @@ public class SunshineActivity extends WearableActivity  implements
         setContentView(R.layout.activity_sunshine);
         setAmbientEnabled();
 
-        mContainerView = (BoxInsetLayout) findViewById(R.id.container);
-        //mTextView = (TextView) findViewById(R.id.text);
+        mContainerView = (LinearLayout) findViewById(R.id.container);
         mClockView = (TextView) findViewById(R.id.clock);
         mDate= (TextView) findViewById(R.id.date);
         mDaysWeatherImage = (ImageView) findViewById(R.id.days_weather_image);
         mHighTemp = (TextView ) findViewById(R.id.higher_degree);
         mLowTemp = (TextView ) findViewById(R.id.lower_degree);
         mCityName = (TextView ) findViewById(R.id.city_name);
-        mHorizontalRuler = (View) findViewById(R.id.horizontal_ruler);
+        mHorizontalRuler = findViewById(R.id.horizontal_ruler);
 
         initGoogleApiClient();
 
