@@ -20,7 +20,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -29,7 +28,6 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.text.format.Time;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.android.sunshine.app.BuildConfig;
@@ -38,15 +36,11 @@ import com.example.android.sunshine.app.R;
 import com.example.android.sunshine.app.Utility;
 import com.example.android.sunshine.app.data.WeatherContract;
 import com.example.android.sunshine.app.muzei.WeatherMuzeiSource;
+import com.example.android.sunshine.app.wearable.WearableDomain;
+import com.example.android.sunshine.app.wearable.WearableTask;
+import com.example.android.sunshine.app.wearable.WearableUtility;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.wearable.DataApi;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
-import com.google.android.gms.wearable.Wearable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,7 +54,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Date;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 
@@ -112,10 +105,10 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+
         Log.d(LOG_TAG, "Starting sync");
 
-
-        initWear();
+        mGoogleApiClient = WearableUtility.initWear(mGoogleApiClient,getContext(),this,this);
 
         // We no longer need just the location String, but also potentially the latitude and
         // longitude, in case we are syncing based on a new Place Picker API result.
@@ -229,29 +222,6 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
     }
 
 
-    private void initWear() {
-
-        if (null == mGoogleApiClient) {
-            mGoogleApiClient = new GoogleApiClient.Builder(getContext())
-                    .addApi(Wearable.API)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .build();
-            Log.v(LOG_TAG, "GoogleApiClient created");
-        }
-
-        if (!mGoogleApiClient.isConnected()) {
-
-            int result = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContext());
-            if (ConnectionResult.SUCCESS == result) {
-                mGoogleApiClient.connect();
-            } else {
-                Toast.makeText(getContext(), "Not connected to wear...", Toast.LENGTH_SHORT).show();
-            }
-            Log.v(LOG_TAG, "Connecting to GoogleApiClient..");
-        }
-
-    }
 
     /**
      * Take the String representing the complete forecast in JSON Format and
@@ -420,7 +390,6 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
                 notifyWeather();
 
                 //WEARABLE
-
                 String highTemp = cvArray[0].getAsString(WeatherContract.WeatherEntry.COLUMN_MAX_TEMP);
                 String lowTemp = cvArray[0].getAsString(WeatherContract.WeatherEntry.COLUMN_MIN_TEMP);
                 boolean isMetric = Utility.isMetric(getContext());
@@ -428,7 +397,16 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
                 //for battery i dont want to send icon to wear
                 int weatherId = cvArray[0].getAsInteger(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID);
 
-                notifyWear(cityName, highTemp, lowTemp, isMetric,weatherId); //today
+                WearableDomain wearableDomain = new WearableDomain();
+                wearableDomain.setGoogleApiClient(mGoogleApiClient);
+                wearableDomain.setCityName(cityName);
+                wearableDomain.setHighTemp(highTemp);
+                wearableDomain.setLowTemp(lowTemp);
+                wearableDomain.setIsMetric(isMetric);
+                wearableDomain.setWeatherResourceId(weatherId);
+
+
+                new WearableTask(wearableDomain).execute(); //today
 
             }
             Log.d(LOG_TAG, "Sync Complete. " + cVVector.size() + " Inserted");
@@ -568,9 +546,6 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
     }
 
 
-    public void notifyWear(String cityName,String highTemp,String lowTemp,boolean isMecric,int weatherResourceId) {
-        new WearableTask(getContext(), cityName,highTemp,lowTemp,isMecric,weatherResourceId).execute();
-    }
 
     /**
      * Helper method to handle insertion of a new location in the weather database.
@@ -747,55 +722,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter implements 
     }
 
 
-    class WearableTask extends AsyncTask<Node, Void, Void> {
 
-        private final String mCityName;
-        private final String mHighTemp;
-        private final String mLowTemp;
-        private final boolean mIsMetric;
-        private final int mWeatherResourceId;
-
-        Context c;
-
-        public WearableTask(Context c, String cityName,String highTemp,String lowTemp,boolean isMetric,int weatherResourceId) {
-            this.c = c;
-            mCityName = cityName;
-            mHighTemp = highTemp;
-            mLowTemp = lowTemp;
-            mIsMetric = isMetric;
-            mWeatherResourceId = weatherResourceId;
-        }
-
-        @Override
-        protected Void doInBackground(Node... nodes) {
-
-            PutDataMapRequest dataMap = PutDataMapRequest.create("/sunshine/event");
-
-            dataMap.getDataMap().putInt("weather-resource-id", mWeatherResourceId);
-            dataMap.getDataMap().putString("city-name", mCityName);
-            dataMap.getDataMap().putString("high-temp", String.format("%.0f", new Double(mHighTemp)));
-            dataMap.getDataMap().putString("low-temp", String.format("%.0f", new Double(mLowTemp)));
-            dataMap.getDataMap().putBoolean("is-metric", mIsMetric);
-            dataMap.getDataMap().putLong("time", new Date().getTime()); // MOST IMPORTANT LINE FOR TIMESTAMP
-            PutDataRequest request = dataMap.asPutDataRequest();
-            request.setUrgent();
-
-            Wearable.DataApi
-                    .putDataItem(mGoogleApiClient, request).setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
-
-                @Override
-                public void onResult(DataApi.DataItemResult dataItemResult) {
-                    Log.d(LOG_TAG, "Google Api Client Connection OK : " + dataItemResult.getStatus() + ", " + dataItemResult.getDataItem().getUri());
-                }
-
-            });
-
-
-            Log.d(LOG_TAG, "/sunshine/event status " + getStatus());
-
-            return null;
-        }
-    }
 
 
 }

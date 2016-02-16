@@ -17,7 +17,6 @@ package com.example.android.sunshine.app;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
@@ -25,18 +24,28 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Checkable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.android.sunshine.app.data.WeatherContract;
+import com.example.android.sunshine.app.wearable.WearableDomain;
+import com.example.android.sunshine.app.wearable.WearableTask;
+import com.example.android.sunshine.app.wearable.WearableUtility;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 /**
  * {@link ForecastAdapter} exposes a list of weather forecasts
  * from a {@link android.database.Cursor} to a {@link android.support.v7.widget.RecyclerView}.
  */
-public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapterViewHolder> {
+public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapterViewHolder>
+                            implements GoogleApiClient.ConnectionCallbacks,
+                                        GoogleApiClient.OnConnectionFailedListener {
+
+    private static final String LOG_TAG = ForecastAdapter.class.getSimpleName();
+
+    private GoogleApiClient mGoogleApiClient;
 
     private static final int VIEW_TYPE_TODAY = 0;
     private static final int VIEW_TYPE_FUTURE_DAY = 1;
@@ -90,6 +99,8 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         mEmptyView = emptyView;
         mICM = new ItemChoiceManager(this);
         mICM.setChoiceMode(choiceMode);
+
+        mGoogleApiClient = WearableUtility.initWear(mGoogleApiClient, mContext, this, this);
     }
 
     /*
@@ -122,6 +133,33 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         }
     }
 
+
+    //FOR WEARABLE
+    private static final int INDEX_MAX_TEMP = 3;
+    private static final int INDEX_MIN_TEMP = 4;
+    private static final int INDEX_LOCATION = 5;
+
+
+    private void updateWear(int weatherId) {
+
+        String highTemp = mCursor.getString(INDEX_MAX_TEMP);
+        String lowTemp = mCursor.getString(INDEX_MIN_TEMP);
+        boolean isMetric = Utility.isMetric(mContext);
+
+        //for battery i dont want to send icon to wear
+        WearableDomain wearableDomain = new WearableDomain();
+        wearableDomain.setGoogleApiClient(mGoogleApiClient);
+        wearableDomain.setCityName(mCursor.getString(INDEX_LOCATION));
+        wearableDomain.setHighTemp(highTemp);
+        wearableDomain.setLowTemp(lowTemp);
+        wearableDomain.setIsMetric(isMetric);
+        wearableDomain.setWeatherResourceId(weatherId);
+
+        new WearableTask(wearableDomain).execute();
+
+
+    }
+
     @Override
     public void onBindViewHolder(ForecastAdapterViewHolder forecastAdapterViewHolder, int position) {
         mCursor.moveToPosition(position);
@@ -132,6 +170,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         switch (getItemViewType(position)) {
             case VIEW_TYPE_TODAY:
                 defaultImage = Utility.getArtResourceForWeatherCondition(weatherId);
+                updateWear(weatherId);
                 useLongToday = true;
                 break;
             default:
@@ -228,4 +267,24 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
             vfh.onClick(vfh.itemView);
         }
     }
+
+
+    //WEARABLE
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        Log.v(LOG_TAG, "onConnected called");
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.v(LOG_TAG, "onConnectionSuspended called");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.v(LOG_TAG, "onConnectionFailed called");
+    }
+
+
 }
