@@ -2,7 +2,6 @@ package com.example.android.sunshine.app;
 
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
-import android.support.wearable.view.BoxInsetLayout;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;

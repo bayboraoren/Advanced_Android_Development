@@ -2,11 +2,20 @@
 <resources>
 
     <color name="background_blue">#2aa9f1</color>
+    <color name="background_black">#000</color>
+    <color name="high_temp_color">#2aa9f1</color>
+    <color name="low_temp_color">#2aa9f1</color>
+    <color name="background_white">#fff</color>
+    <color name="time_color">#fff</color>
     <color name="city_color">#b3e1f9</color>
     <color name="date_color">#b3e1f9</color>
+
     <color name="horizontal_rule_color">#58bdf4</color>
     <color name="higher_degree_color">#fff</color>
     <color name="lower_degree_color">#b7e2fa</color>
+    <color name="analog_hands">#cccccc</color>
+    <color name="background">#000000</color>
+    <color name="background2">#000088</color>
 
 
 
