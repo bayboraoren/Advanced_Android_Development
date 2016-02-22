@@ -297,8 +297,8 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
 
             int centerX = bounds.width() / 2;
             int centerY = bounds.height() / 2;
-            int bottomY = 110;
-            int boundHeight = 200;
+            int boundHeight = bounds.height()/2+50;
+            int bottomYForWeatherPanel = 100;
 
             initTimeBackground(mAmbient);
             initWeatherBackground(mAmbient);
@@ -307,28 +307,28 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
                 //time, date, city background
                 canvas.drawRect(0, 0, bounds.width(), boundHeight, mTimeBackgroundPaint);
                 //weather background
-                canvas.drawRect(0, 200, bounds.width(), bounds.height(), mWeatherBackgroundPaint);
+                canvas.drawRect(0, boundHeight, bounds.width(), bounds.height(), mWeatherBackgroundPaint);
             }else{
                 //time, date, city background
                 canvas.drawRect(0, 0, bounds.width(), boundHeight, mTimeBackgroundPaint);
                 //weather background
-                canvas.drawRect(0, 200, bounds.width(), bounds.height(), mWeatherBackgroundPaint);
+                canvas.drawRect(0, boundHeight, bounds.width(), bounds.height(), mWeatherBackgroundPaint);
             }
 
             //time
             mTime.setToNow();
             String time = String.format("%d:%02d", mTime.hour, mTime.minute);
-            canvas.drawText(time, textCenterJustify(centerX, mTimeTextPaint, time), 125, mTimeTextPaint);
+            canvas.drawText(time, textCenterJustify(centerX, mTimeTextPaint, time), 140, mTimeTextPaint);
 
             //date
             if(!mAmbient) {
                 String date = sdf.format(new Date());
-                canvas.drawText(date, textCenterJustify(centerX, mDateTextPaint, date), 145, mDateTextPaint);
+                canvas.drawText(date, textCenterJustify(centerX, mDateTextPaint, date), 160, mDateTextPaint);
             }
 
             //city
             if (!mAmbient && mCityName != null) {
-                canvas.drawText(mCityName, textCenterJustify(centerX, mCityTextPaint, mCityName), 165, mCityTextPaint);
+                canvas.drawText(mCityName, textCenterJustify(centerX, mCityTextPaint, mCityName), 180, mCityTextPaint);
             }
 
 
@@ -339,17 +339,17 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             //high temp
             if (!mAmbient && mSunshineHighTemp != null) {
                 float highTempCenterXPosition = textCenterJustify(centerX, mHighTempTextPaint, mSunshineHighTemp);
-                canvas.drawText(mSunshineHighTemp, highTempCenterXPosition, centerY + bottomY, mHighTempTextPaint);
+                canvas.drawText(mSunshineHighTemp, highTempCenterXPosition, centerY + bottomYForWeatherPanel, mHighTempTextPaint);
             }
 
             //low temp
             if (!mAmbient && mSunshineLowTemp != null) {
-                canvas.drawText(mSunshineLowTemp, textRightJustifyFor(centerX, mHighTempTextPaint, mSunshineHighTemp, mSunshineLowTemp, gapBetween), centerY + bottomY, mLowTempTextPaint);
+                canvas.drawText(mSunshineLowTemp, textRightJustifyFor(centerX, mHighTempTextPaint, mSunshineHighTemp, mSunshineLowTemp, gapBetween), centerY + bottomYForWeatherPanel , mLowTempTextPaint);
             }
 
             //weather image
             if (!mAmbient && mBackgroundScaledBitmap != null) {
-                canvas.drawBitmap(mBackgroundScaledBitmap, imageLeftJustifyFor(centerX, mHighTempTextPaint, mSunshineHighTemp, mBackgroundScaledBitmap, gapBetween), 201, null);
+                canvas.drawBitmap(mBackgroundScaledBitmap, imageLeftJustifyFor(centerX, mHighTempTextPaint, mSunshineHighTemp, mBackgroundScaledBitmap, gapBetween),centerY +  bottomYForWeatherPanel - scaleHeight + scaleHeight/2, null);
             }else if(mAmbient && mBackgroundScaledBitmap != null){
                 Bitmap bwBitmap = Utility.createContrast(mBackgroundScaledBitmap,50);
                 canvas.drawBitmap(bwBitmap, weatherImageCenterJustify(centerX), 201, null);
